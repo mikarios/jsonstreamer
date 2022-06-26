@@ -1,7 +1,7 @@
 package config
 
 type Config struct {
-	PortsFileLocation string `envconfig:"PORTS_FILE" default:"./helperFiles/portsSmall.json"`
+	PortsFileLocation string `envconfig:"PORTS_FILE" default:"./third_party/portsSmall.json"`
 	LOG               LogConfig
 	Elastic           ElasticConfig
 }
