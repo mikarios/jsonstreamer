@@ -1,0 +1,35 @@
+version: '3.7'
+
+networks:
+  network:
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.4
+    container_name: es
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - 9200:9200
+
+  parser:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jsonparser
+    environment:
+      - LOG_FORMAT=text
+      - LOG_LEVEL=debug
+      - LOG_TRACE=true
+      - PORTS_FILE=/ports.json
+      - MAX_MEMORY_BYTES=200
+      - PORT_COLLECTOR_WORKERS=4
+      - ELASTIC_URLS=http://es:9200
+      - ELASTIC_IDX_PORTS_REPLICAS=0
+      - ELASTIC_IDX_PORTS=ports
+    depends_on:
+      - elasticsearch
+    volumes:
+      - ./third_party/ports.json:/ports.json
+    command: /bin/sh -c 'sleep 10 && /jsonParser'
