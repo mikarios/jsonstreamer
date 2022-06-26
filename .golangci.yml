@@ -1,0 +1,73 @@
+linters-settings:
+  govet:
+    check-shadowing: true
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+  misspell:
+    locale: UK
+  lll:
+    line-length: 120
+  goimports:
+    local-prefixes: github.com/mikarios/form3
+  gci:
+    local-prefixes: github.com/mikarios/form3
+  funlen:
+    lines: 90
+  gocritic:
+    enabled-tags:
+      - performance
+      - style
+      - experimental
+    disabled-checks:
+      - appendAssign
+  cyclop:
+    max-complexity: 30
+    package-average: 0.0
+    skip-tests: true
+  revive:
+    # see https://github.com/mgechev/revive#available-rules for details.
+    ignore-generated-header: true
+    severity: warning
+    rules:
+      - name: indent-error-flow
+        severity: warning
+      - name: add-constant
+        severity: warning
+
+  godox:
+    keywords:
+      - FIXME
+      - BUG
+
+linters:
+  # inverted configuration with `enable-all` and `disable` is not scalable during updates of golangci-lint
+  enable-all: true
+  disable:
+    - wrapcheck
+    - exhaustivestruct
+    - gochecknoglobals
+    - gci
+    - maligned
+    - interfacer
+    - scopelint
+    - tagliatelle
+    - gochecknoinits
+    - revive
+    - golint
+    - gomnd
+    - dupl
+    - nlreturn
+    - varnamelen
+    - ireturn
+    - exhaustive
+    - errchkjson
+    - nonamedreturns
+    - exhaustruct
+    - execinquery
+    - testpackage
+    - gocritic
+
+run:
+  skip-files:
+#    - test
