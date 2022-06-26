@@ -10,15 +10,18 @@ import (
 
 var (
 	ErrNotReadable      = errors.New("directory is not readable")
+	ErrNotADirectory    = errors.New("path is not a directory")
 	ErrCouldNotOpenFile = errors.New("could not open")
 	ErrDecodeDelimiter  = errors.New("could not find expected delimiter")
 	ErrDecodeItem       = errors.New("could not decode item")
+	shutDownChannel     = make(chan interface{})
 )
 
 type JSONStreamer[T any] struct {
-	fileToScan string
-	stream     chan *Entry[T]
-	stop       bool
+	fileToScan     string
+	stream         chan *Entry[T]
+	stop           bool
+	notifyOnFinish chan<- interface{}
 }
 
 type Entry[T any] struct {
@@ -28,17 +31,19 @@ type Entry[T any] struct {
 }
 
 func New[T any](
-	fileToScan string,
+	jsonToScan string,
 	channelBufferCapacity int,
+	notifyOnFinish chan<- interface{},
 ) (*JSONStreamer[T], error) {
-	if _, err := os.Stat(fileToScan); err != nil {
+	if _, err := os.Stat(jsonToScan); err != nil {
 		return nil, fmt.Errorf("%w: %v", ErrNotReadable, err)
 	}
 
 	return &JSONStreamer[T]{
-		fileToScan: fileToScan,
-		stream:     make(chan *Entry[T], channelBufferCapacity),
-		stop:       false,
+		fileToScan:     jsonToScan,
+		stream:         make(chan *Entry[T], channelBufferCapacity),
+		stop:           false,
+		notifyOnFinish: notifyOnFinish,
 	}, nil
 }
 
@@ -70,6 +75,7 @@ func (js *JSONStreamer[T]) Start() {
 		}
 
 		if js.shouldExit() {
+			shutDownChannel <- struct{}{}
 			break
 		}
 
@@ -86,7 +92,7 @@ func (js *JSONStreamer[T]) Start() {
 		}
 
 		data := new(T)
-		if err = decoder.Decode(data); err != nil {
+		if err := decoder.Decode(data); err != nil {
 			js.stream <- &Entry[T]{Err: fmt.Errorf("%w: %v", ErrDecodeItem, err)}
 			return
 		}
@@ -94,9 +100,16 @@ func (js *JSONStreamer[T]) Start() {
 		js.stream <- &Entry[T]{Data: *data, Key: key}
 	}
 
-	if _, err = decoder.Token(); err != nil {
+	if _, err := decoder.Token(); err != nil {
 		js.stream <- &Entry[T]{Err: fmt.Errorf("%w: [closing] %v", ErrDecodeDelimiter, err)}
 	}
+
+	go func() {
+		js.notifyOnFinish <- struct{}{}
+	}()
+	go func() {
+		shutDownChannel <- struct{}{}
+	}()
 }
 
 func shouldContinue() bool {
@@ -105,6 +118,10 @@ func shouldContinue() bool {
 }
 
 func (js *JSONStreamer[T]) shouldExit() bool {
-	// todo: implement graceful shutdown
-	return false
+	return js.stop
+}
+
+func (js *JSONStreamer[T]) GracefulShutdown() <-chan interface{} {
+	js.stop = true
+	return shutDownChannel
 }

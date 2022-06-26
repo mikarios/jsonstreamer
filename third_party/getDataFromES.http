@@ -1,0 +1,8 @@
+### port AEAJM
+GET http://localhost:9200/ports/_doc/AEAJM
+
+### port AEAUH
+GET http://localhost:9200/ports/_doc/AEAUH
+
+### all documents
+GET http://localhost:9200/ports/_search
