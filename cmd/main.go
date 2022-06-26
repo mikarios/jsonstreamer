@@ -10,6 +10,10 @@ import (
 	"github.com/mikarios/golib/logger"
 
 	"github.com/mikarios/jsonstreamer/internal/config"
+	"github.com/mikarios/jsonstreamer/internal/elasticclient"
+	"github.com/mikarios/jsonstreamer/internal/models/portmodel"
+	"github.com/mikarios/jsonstreamer/internal/services/jsonstreamersvc"
+	"github.com/mikarios/jsonstreamer/internal/services/portdomainsvc"
 )
 
 func main() {
@@ -22,6 +26,17 @@ func main() {
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGQUIT, syscall.SIGTERM)
+
+	elasticclient.Init()
+
+	jsSvc, err := jsonstreamersvc.New[*portmodel.PortData](cfg.PortsFileLocation, 0)
+	if err != nil {
+		logger.Panic(bgCTX, err, "could not initialise streamer service")
+	}
+
+	portDomainService := portdomainsvc.New(jsSvc)
+
+	go portDomainService.Start(bgCTX)
 
 	event := <-quit
 	logger.Warning(bgCTX, fmt.Sprintf("RECEIVED SIGNAL: %v exiting", event))
