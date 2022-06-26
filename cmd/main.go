@@ -12,6 +12,7 @@ import (
 	"github.com/mikarios/jsonstreamer/internal/config"
 	"github.com/mikarios/jsonstreamer/internal/elasticclient"
 	"github.com/mikarios/jsonstreamer/internal/models/portmodel"
+	"github.com/mikarios/jsonstreamer/internal/services/databasesvc"
 	"github.com/mikarios/jsonstreamer/internal/services/jsonstreamersvc"
 	"github.com/mikarios/jsonstreamer/internal/services/portcollectorsvc"
 	"github.com/mikarios/jsonstreamer/internal/services/portdomainsvc"
@@ -35,7 +36,8 @@ func main() {
 		logger.Panic(bgCTX, err, "could not initialise streamer service")
 	}
 
-	portCollectorSVC := portcollectorsvc.New(nil)
+	dbSVC := databasesvc.New()
+	portCollectorSVC := portcollectorsvc.New(dbSVC)
 	portDomainService := portdomainsvc.New(jsonStreamerSvc, portCollectorSVC)
 
 	go portDomainService.Start(bgCTX)

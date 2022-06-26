@@ -2,6 +2,7 @@ package portcollectorsvc
 
 import (
 	"context"
+	"errors"
 	"runtime"
 
 	"github.com/mikarios/golib/logger"
@@ -64,8 +65,7 @@ func (pc *PortCollectorService) spawnWorker() {
 
 	for port := range pc.portChan {
 		if pc.db == nil {
-			// todo: remove this when I implement the database
-			logger.Debug(context.Background(), port.Key, *port.Data)
+			logger.Error(context.Background(), errors.New("db is nil"), "could not store", port.Key, *port.Data)
 			continue
 		}
 

@@ -3,6 +3,7 @@ module github.com/mikarios/jsonstreamer
 go 1.18
 
 require (
+	github.com/google/uuid v1.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/mikarios/golib v1.1.0
 	github.com/olivere/elastic/v7 v7.0.32
