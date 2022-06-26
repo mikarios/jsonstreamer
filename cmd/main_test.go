@@ -25,6 +25,8 @@ var (
 func Test_EndToEnd(t *testing.T) {
 	t.Parallel()
 
+	defer cleanUp()
+
 	cfg := config.Init("")
 	cfg.Elastic.URLList = []string{elasticURL}
 	cfg.PortCollectorWorkers = 4
@@ -81,5 +83,16 @@ func Test_EndToEnd(t *testing.T) {
 			t.Errorf("got %v expected %v", gotPort, port)
 			t.Fail()
 		}
+	}
+}
+
+func cleanUp() {
+	req, err := http.NewRequest(http.MethodDelete, elasticURL+"/"+testPortIndex, http.NoBody)
+	if err != nil {
+		panic(err)
+	}
+
+	if _, err = http.DefaultClient.Do(req); err != nil {
+		panic(err)
 	}
 }
