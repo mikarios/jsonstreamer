@@ -1,9 +1,11 @@
 package config
 
 type Config struct {
-	PortsFileLocation string `envconfig:"PORTS_FILE" default:"./third_party/portsSmall.json"`
-	LOG               LogConfig
-	Elastic           ElasticConfig
+	PortsFileLocation    string `envconfig:"PORTS_FILE" default:"./third_party/portsSmall.json"`
+	MaxMemoryAvailable   int64  `envconfig:"MAX_MEMORY_BYTES"`
+	PortCollectorWorkers int    `envconfig:"PORT_COLLECTOR_WORKERS" default:"2"`
+	LOG                  LogConfig
+	Elastic              ElasticConfig
 }
 
 type ElasticConfig struct {

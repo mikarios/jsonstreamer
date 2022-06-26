@@ -13,6 +13,7 @@ import (
 	"github.com/mikarios/jsonstreamer/internal/elasticclient"
 	"github.com/mikarios/jsonstreamer/internal/models/portmodel"
 	"github.com/mikarios/jsonstreamer/internal/services/jsonstreamersvc"
+	"github.com/mikarios/jsonstreamer/internal/services/portcollectorsvc"
 	"github.com/mikarios/jsonstreamer/internal/services/portdomainsvc"
 )
 
@@ -29,12 +30,13 @@ func main() {
 
 	elasticclient.Init()
 
-	jsSvc, err := jsonstreamersvc.New[*portmodel.PortData](cfg.PortsFileLocation, 0)
+	jsonStreamerSvc, err := jsonstreamersvc.New[*portmodel.PortData](cfg.PortsFileLocation, 0)
 	if err != nil {
 		logger.Panic(bgCTX, err, "could not initialise streamer service")
 	}
 
-	portDomainService := portdomainsvc.New(jsSvc)
+	portCollectorSVC := portcollectorsvc.New(nil)
+	portDomainService := portdomainsvc.New(jsonStreamerSvc, portCollectorSVC)
 
 	go portDomainService.Start(bgCTX)
 

@@ -7,20 +7,26 @@ import (
 
 	"github.com/mikarios/jsonstreamer/internal/models/portmodel"
 	"github.com/mikarios/jsonstreamer/internal/services/jsonstreamersvc"
+	"github.com/mikarios/jsonstreamer/internal/services/portcollectorsvc"
 )
 
 type portDomainService struct {
-	jsonStreamingSvc *jsonstreamersvc.JSONStreamer[*portmodel.PortData]
+	jsonStreamingSvc     *jsonstreamersvc.JSONStreamer[*portmodel.PortData]
+	portCollectorService *portcollectorsvc.PortCollectorService
 }
 
-func New(jsonStreamingSvc *jsonstreamersvc.JSONStreamer[*portmodel.PortData]) *portDomainService {
-	return &portDomainService{jsonStreamingSvc: jsonStreamingSvc}
+func New(
+	jsonStreamingSvc *jsonstreamersvc.JSONStreamer[*portmodel.PortData],
+	portCollectorService *portcollectorsvc.PortCollectorService,
+) *portDomainService {
+	return &portDomainService{jsonStreamingSvc: jsonStreamingSvc, portCollectorService: portCollectorService}
 }
 
 func (pd *portDomainService) Start(ctx context.Context) {
 	stream := pd.jsonStreamingSvc.Watch()
 
 	go pd.jsonStreamingSvc.Start()
+	go pd.portCollectorService.Start()
 
 	go func() {
 		for item := range stream {
@@ -29,10 +35,7 @@ func (pd *portDomainService) Start(ctx context.Context) {
 				continue
 			}
 
-			logger.Warning(ctx, portmodel.Port{
-				Key:  item.Key,
-				Data: item.Data,
-			})
+			pd.portCollectorService.NewPort(&portmodel.Port{Key: item.Key, Data: item.Data})
 		}
 	}()
 }
