@@ -15,9 +15,10 @@ var (
 	workerFinishedChan = make(chan interface{})
 	shutdownChan       = make(chan interface{})
 	noOfWorkers        int
+	ErrEmptyDB         = errors.New("db is nil")
 )
 
-// In principle I wouldn't use a DB here IF there was some processing to be done to the ports. I would implement a
+// In principle, I wouldn't use a DB here IF there was some processing to be done to the ports. I would implement a
 // similar way of communication as the one between jsonStreamer and portCollector.
 // Since there's no processing done, and I don't think I will have enough time for this, I will simply inject a DB here.
 type idb interface {
@@ -65,7 +66,7 @@ func (pc *PortCollectorService) spawnWorker() {
 
 	for port := range pc.portChan {
 		if pc.db == nil {
-			logger.Error(context.Background(), errors.New("db is nil"), "could not store", port.Key, *port.Data)
+			logger.Error(context.Background(), ErrEmptyDB, "could not store", port.Key, *port.Data)
 			continue
 		}
 
