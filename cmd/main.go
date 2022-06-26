@@ -33,25 +33,32 @@ func main() {
 
 	elasticclient.Init()
 
-	jsonStreamerSvc, err := jsonstreamersvc.New[*portmodel.PortData](cfg.PortsFileLocation, 0, notifyOnFinish)
-	if err != nil {
-		logger.Panic(bgCTX, err, "could not initialise streamer service")
-	}
-
-	dbSVC := databasesvc.New()
-	portCollectorSVC := portcollectorsvc.New(dbSVC)
-	portDomainService := portdomainsvc.New(jsonStreamerSvc, portCollectorSVC, dbSVC, notifyOnFinish)
-
-	done := portDomainService.Start(bgCTX)
+	done := startServices(bgCTX, cfg, notifyOnFinish)
 
 	select {
 	case <-done:
 		logger.Info(context.Background(), "Parsing of json finished. Exiting")
 	case event := <-quit:
 		logger.Warning(bgCTX, fmt.Sprintf("RECEIVED SIGNAL: %v exiting", event))
-		portDomainService.GracefulShutdown()
 		<-done
 	}
+}
+
+func startServices(
+	ctx context.Context,
+	cfg *config.Config,
+	notifyOnFinishCh chan interface{},
+) (doneCh chan interface{}) {
+	jsonStreamerSvc, err := jsonstreamersvc.New[*portmodel.PortData](cfg.PortsFileLocation, 0, notifyOnFinishCh)
+	if err != nil {
+		logger.Panic(ctx, err, "could not initialise streamer service")
+	}
+
+	dbSVC := databasesvc.New()
+	portCollectorSVC := portcollectorsvc.New(dbSVC)
+	portDomainService := portdomainsvc.New(jsonStreamerSvc, portCollectorSVC, dbSVC, notifyOnFinishCh)
+
+	return portDomainService.Start(ctx)
 }
 
 func setupLogger(level, formatter string, trace bool) error {

@@ -10,7 +10,6 @@ import (
 
 var (
 	ErrNotReadable      = errors.New("directory is not readable")
-	ErrNotADirectory    = errors.New("path is not a directory")
 	ErrCouldNotOpenFile = errors.New("could not open")
 	ErrDecodeDelimiter  = errors.New("could not find expected delimiter")
 	ErrDecodeItem       = errors.New("could not decode item")
