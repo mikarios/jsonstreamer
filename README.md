@@ -26,7 +26,7 @@ In order for jsonstreamer to execute the following environment variables are nee
 - LOG_LEVEL=debug
 - LOG_TRACE=true
 - PORTS_FILE=./third_party/ports.json
-- MAX_MEMORY_BYTES=0
+- MAX_MEMORY_MB=0
 - PORT_COLLECTOR_WORKERS=0
 - ELASTIC_URLS=http://localhost:9200
 - ELASTIC_IDX_PORTS_REPLICAS=0
@@ -37,6 +37,6 @@ For the end to end test to execute these values are changed with the important o
 A simple `docker-compose up -d && docker logs -f jsonparser` should execute the jsonparser against the given [ports.json](third_party/ports.json)
 
 ### To improve:
-* Missing implementation for shouldContinue() function inside [jsonStreamerService](internal/services/jsonstreamersvc/jsonStreamerService.go).
 * Better distinction between database service and portCollector service. Didn't have enough time, and it seemed like over engineering for this specific task since there was no manipulation of port data needed.
   * However, better distinction would allow us to send data to elastic in batches and not one by one, making it a better practice for our database
+* More tests needed but time was limited

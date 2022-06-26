@@ -2,7 +2,7 @@ package config
 
 type Config struct {
 	PortsFileLocation    string `envconfig:"PORTS_FILE" default:"./third_party/ports.json"`
-	MaxMemoryAvailable   int64  `envconfig:"MAX_MEMORY_BYTES"`
+	MaxMemoryAvailable   uint64 `envconfig:"MAX_MEMORY_MB"`
 	PortCollectorWorkers int    `envconfig:"PORT_COLLECTOR_WORKERS" default:"2"`
 	LOG                  LogConfig
 	Elastic              ElasticConfig

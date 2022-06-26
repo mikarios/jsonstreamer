@@ -23,7 +23,7 @@ services:
       - LOG_LEVEL=debug
       - LOG_TRACE=true
       - PORTS_FILE=/ports.json
-      - MAX_MEMORY_BYTES=200
+      - MAX_MEMORY_MB=200
       - PORT_COLLECTOR_WORKERS=4
       - ELASTIC_URLS=http://es:9200
       - ELASTIC_IDX_PORTS_REPLICAS=0

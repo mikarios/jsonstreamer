@@ -5,7 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"runtime"
 	"time"
+
+	"github.com/mikarios/jsonstreamer/internal/config"
 )
 
 var (
@@ -112,8 +115,20 @@ func (js *JSONStreamer[T]) Start() {
 }
 
 func shouldContinue() bool {
-	// todo:check current ram consumption
-	return true
+	var m runtime.MemStats
+
+	runtime.ReadMemStats(&m)
+	currentRAM := bToMB(m.TotalAlloc)
+
+	if config.GetInstance().MaxMemoryAvailable > 0 {
+		return currentRAM < 90*config.GetInstance().MaxMemoryAvailable/100
+	}
+
+	return m.TotalAlloc < 90*m.Sys/100
+}
+
+func bToMB(b uint64) uint64 {
+	return b / 1024 / 1024
 }
 
 func (js *JSONStreamer[T]) shouldExit() bool {
