@@ -20,8 +20,11 @@ var (
 	testPortIndex = "test-ports"
 )
 
-// I don't have time to mock the db. Normally I would simply create a mock with a map in memory and use that for testing
+// I don't have time to mock the db. Normally I would simply create a mock with
+// a map in memory and use that for testing.
 func Test_EndToEnd(t *testing.T) {
+	t.Parallel()
+
 	cfg := config.Init("")
 	cfg.Elastic.URLList = []string{elasticURL}
 	cfg.PortCollectorWorkers = 4
