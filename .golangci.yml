@@ -9,9 +9,9 @@ linters-settings:
   lll:
     line-length: 120
   goimports:
-    local-prefixes: github.com/mikarios/form3
+    local-prefixes: github.com/mikarios/jsonstreamer
   gci:
-    local-prefixes: github.com/mikarios/form3
+    local-prefixes: github.com/mikarios/jsonstreamer
   funlen:
     lines: 90
   gocritic:
